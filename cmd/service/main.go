@@ -7,22 +7,17 @@ import (
 	"github.com/microservices-spb/gateway/internal/api"
 	"github.com/microservices-spb/gateway/internal/client/auth"
 	"github.com/microservices-spb/gateway/internal/repository"
-	"github.com/microservices-spb/gateway/internal/service"
 )
 
 func main() {
 
-	repo := repository.New()
+	repo := repository.ConnectToDB()
 
 	authClient := auth.New()
 
-	srv := service.New(repo)
+	srv := Repository.Conn(repo)
 
 	handler := api.New(srv, authClient)
-
-	//response := handler.Do(2, 7)
-
-	//fmt.Println(response)
 
 	http.HandleFunc("/login", handler.Handler)
 
