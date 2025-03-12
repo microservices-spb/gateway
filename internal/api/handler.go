@@ -1,12 +1,12 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"log"
 	"net/http"
 
-	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/microservices-spb/gateway/internal/model"
 )
@@ -14,12 +14,12 @@ import (
 type Handler struct {
 	//srv Srv
 	aC AuthClient
-	Db *Repository.Conn
+	Db UserRepository
 }
 
-func New(Db *sqlx.DB, aC AuthClient) *Handler {
+func New(Db UserRepository, aC AuthClient) *Handler {
 	return &Handler{
-		Db: *sqlx.DB,
+		Db: Db,
 		aC: aC,
 	}
 }
@@ -46,25 +46,23 @@ func (h *Handler) Handler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	var reqData model.RequestData
+	var user model.User
 
-	err = json.Unmarshal(data, &reqData)
+	err = json.Unmarshal(data, &user)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	}
 
-	var reqId int32
-	query := "INSERT INTO usersInfo (username, password) VALUES ($1, $2) RETURNING id"
-	err = h.Db.QueryRow(query, reqData.Username, reqData.Password).Scan(&reqId)
+	id, err := h.Db.Save(context.Background(), &user)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
-		return
+		w.WriteHeader(http.StatusInternalServerError)
 	}
+	w.WriteHeader(http.StatusCreated)
+	log.Println(id)
 
-	token, err := h.aC.DoLogin(r.Context(), reqData)
+	token, err := h.aC.DoLogin(r.Context(), model.RequestData{})
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))

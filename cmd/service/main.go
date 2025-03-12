@@ -11,13 +11,13 @@ import (
 
 func main() {
 
-	repo := repository.ConnectToDB()
+	conn := repository.ConnectToDB()
+
+	userRepo := repository.NewPostgresUserRepository(conn.Conn)
 
 	authClient := auth.New()
 
-	srv := Repository.Conn(repo)
-
-	handler := api.New(srv, authClient)
+	handler := api.New(userRepo, authClient)
 
 	http.HandleFunc("/login", handler.Handler)
 
