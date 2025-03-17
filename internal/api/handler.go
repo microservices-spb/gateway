@@ -55,7 +55,7 @@ func (h *Handler) Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := h.Db.Save(context.Background(), &user)
+	id, err := h.Db.SaveUser(context.Background(), &user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}

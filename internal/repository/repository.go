@@ -34,15 +34,15 @@ func ConnectToDB() *PostgresUserRepository {
 	return &PostgresUserRepository{Conn: conn}
 }
 
-func (r *PostgresUserRepository) SaveUser(ctx context.Context, user *model.User) (*model.User, error) {
+func (r *PostgresUserRepository) SaveUser(ctx context.Context, user *model.User) (*PostgresUserRepository, error) {
 	query := "INSERT INTO usersInfo (username, password) VALUES ($1, $2) RETURNING id"
 	var id int64
 	err := r.Conn.QueryRowContext(ctx, query, user.Username, user.Password).Scan(&id)
 	if err != nil {
-		return user, err
+		return r, err
 	}
 
-	return user, nil
+	return r, nil
 }
 
 func (r *PostgresUserRepository) FindById(ctx context.Context, id int64) (*model.User, error) {
@@ -55,7 +55,7 @@ func (r *PostgresUserRepository) FindById(ctx context.Context, id int64) (*model
 	return &user, nil
 }
 
-var _ api.UserRepository = (*PostgresUserRepository)(nil)
+//var _ api.UserRepository = (*PostgresUserRepository)(nil)
 
 func New() *Repository {
 	db := make(map[int64]int64)
