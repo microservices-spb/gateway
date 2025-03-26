@@ -17,13 +17,15 @@ type Repository struct {
 
 type PostgresUserRepository struct {
 	Conn *sqlx.DB
+	User api.UserRepository
 }
 
 func NewPostgresUserRepository(db api.UserRepository) *PostgresUserRepository {
-	return db.SaveUser()
+	return &PostgresUserRepository{}
 }
 
 func ConnectToDB() *PostgresUserRepository {
+	fmt.Println("Connecting to DB")
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "127.0.0.1", 5432, "master", "master", "usersInfoDB")
 
 	conn, err := sqlx.Connect("postgres", connStr)
@@ -34,15 +36,15 @@ func ConnectToDB() *PostgresUserRepository {
 	return &PostgresUserRepository{Conn: conn}
 }
 
-func (r *PostgresUserRepository) SaveUser(ctx context.Context, user *model.User) (*PostgresUserRepository, error) {
+func (r *PostgresUserRepository) SaveUser(ctx context.Context, user *model.User) (string, error) {
 	query := "INSERT INTO usersInfo (username, password) VALUES ($1, $2) RETURNING id"
 	var id int64
 	err := r.Conn.QueryRowContext(ctx, query, user.Username, user.Password).Scan(&id)
 	if err != nil {
-		return r, err
+		return query, err
 	}
 
-	return r, nil
+	return query, nil
 }
 
 func (r *PostgresUserRepository) FindById(ctx context.Context, id int64) (*model.User, error) {

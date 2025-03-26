@@ -13,7 +13,7 @@ func main() {
 
 	conn := repository.ConnectToDB()
 
-	userRepo := repository.NewPostgresUserRepository(conn.Conn)
+	userRepo := repository.NewPostgresUserRepository(conn.User)
 
 	authClient := auth.New()
 
