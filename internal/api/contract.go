@@ -7,7 +7,7 @@ import (
 )
 
 type UserRepository interface {
-	SaveUser(ctx context.Context, user *model.User) (string, error)
+	SaveUser(ctx context.Context, user *model.RequestData) (string, error)
 	FindById(ctx context.Context, id int64) (*model.User, error)
 }
 

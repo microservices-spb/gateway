@@ -46,7 +46,7 @@ func (h *Handler) Handler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	var user model.User
+	var user model.RequestData
 
 	err = json.Unmarshal(data, &user)
 	if err != nil {
@@ -58,11 +58,13 @@ func (h *Handler) Handler(w http.ResponseWriter, r *http.Request) {
 	id, err := h.Db.SaveUser(context.Background(), &user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
 	}
 	w.WriteHeader(http.StatusCreated)
 	log.Println(id)
 
-	token, err := h.aC.DoLogin(r.Context(), model.RequestData{})
+	token, err := h.aC.DoLogin(r.Context(), user)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))

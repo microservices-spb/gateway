@@ -11,9 +11,9 @@ import (
 
 func main() {
 
-	conn := repository.ConnectToDB()
+	//conn := repository.ConnectToDB()
 
-	userRepo := repository.NewPostgresUserRepository(conn.User)
+	userRepo := repository.ConnectToDB()
 
 	authClient := auth.New()
 

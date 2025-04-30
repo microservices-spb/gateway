@@ -7,7 +7,8 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"github.com/microservices-spb/gateway/internal/api"
+
+	//"github.com/microservices-spb/gateway/internal/api"
 	"github.com/microservices-spb/gateway/internal/model"
 )
 
@@ -17,16 +18,16 @@ type Repository struct {
 
 type PostgresUserRepository struct {
 	Conn *sqlx.DB
-	User api.UserRepository
+	//User api.UserRepository
 }
 
-func NewPostgresUserRepository(db api.UserRepository) *PostgresUserRepository {
+/*func NewPostgresUserRepository(db api.UserRepository) *PostgresUserRepository {
 	return &PostgresUserRepository{}
-}
+}*/
 
 func ConnectToDB() *PostgresUserRepository {
 	fmt.Println("Connecting to DB")
-	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "127.0.0.1", 5432, "master", "master", "usersInfoDB")
+	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", "127.0.0.1", 5433, "master", "master", "usersInfoDB")
 
 	conn, err := sqlx.Connect("postgres", connStr)
 	if err != nil {
@@ -36,7 +37,7 @@ func ConnectToDB() *PostgresUserRepository {
 	return &PostgresUserRepository{Conn: conn}
 }
 
-func (r *PostgresUserRepository) SaveUser(ctx context.Context, user *model.User) (string, error) {
+func (r *PostgresUserRepository) SaveUser(ctx context.Context, user *model.RequestData) (string, error) {
 	query := "INSERT INTO usersInfo (username, password) VALUES ($1, $2) RETURNING id"
 	var id int64
 	err := r.Conn.QueryRowContext(ctx, query, user.Username, user.Password).Scan(&id)
