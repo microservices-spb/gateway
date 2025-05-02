@@ -2,10 +2,13 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/microservices-spb/auth/pkg/auth"
+	"github.com/microservices-spb/gateway/internal/api"
 	"github.com/microservices-spb/gateway/internal/model"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc"
@@ -14,10 +17,7 @@ import (
 
 type Client struct {
 	client auth.AuthServiceClient
-}
-
-type CheckInDB struct {
-	Check UserRepository
+	check  api.UserRepository
 }
 
 func New() *Client {
@@ -40,12 +40,26 @@ func (c *Client) DoLogin(ctx context.Context, data model.RequestData) (string, e
 	return resp.Token, nil
 }
 
-func (c *Client) SignUp(ctx context.Context, data model.RequestData) (string, error) {
-	passHash, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
-	username := model.User{
-		Username: data.Username,
+func (c *Client) SignUp(ctx context.Context, data model.RequestData) error {
+	username, err := c.check.CheckUserInDB(ctx, data.Username)
+	if err != nil {
+		return err
 	}
-	query := "SELECT id, username FROM userinfo WHERE username = $1"
-	err := PostgresUserRepository.Conn.QueryRowContext(ctx, query, username).Scan(&username.Id, &username)
+	if username {
+		return errors.New("username already taken")
+	}
 
+	usernameStr := strconv.FormatBool(username)
+
+	passHash, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
+	if err != nil {
+		log.Fatal("failed to generate password")
+	}
+
+	c.check.SaveUser(ctx, &model.RequestData{
+		Username: usernameStr,
+		Password: string(passHash),
+	})
+
+	return err
 }

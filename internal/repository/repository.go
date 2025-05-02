@@ -53,10 +53,10 @@ func (r *PostgresUserRepository) FindById(ctx context.Context, id int64) (*model
 	return &user, nil
 }
 
-func (r *PostgresUserRepository) CheckUserInDB(ctx context.Context, username model.User) (bool, error) {
+func (r *PostgresUserRepository) CheckUserInDB(ctx context.Context, username string) (bool, error) {
 	query := "SELECT EXISTS (SELECT 1 FROM userinfo WHERE username = $1)"
 	var exists bool
-	err := r.Conn.QueryRowContext(ctx, query, username.Username).Scan(&exists)
+	err := r.Conn.QueryRowContext(ctx, query, username).Scan(&exists)
 	if err != nil {
 		return false, err
 	}
