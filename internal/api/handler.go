@@ -85,6 +85,3 @@ func (h *Handler) Handler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(resJson)
 }
-
-// http://localhost:3111/?a=6&b=2
-// http://localhost:3111/1234

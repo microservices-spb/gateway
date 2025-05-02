@@ -18,12 +18,7 @@ type Repository struct {
 
 type PostgresUserRepository struct {
 	Conn *sqlx.DB
-	//User api.UserRepository
 }
-
-/*func NewPostgresUserRepository(db api.UserRepository) *PostgresUserRepository {
-	return &PostgresUserRepository{}
-}*/
 
 func ConnectToDB() *PostgresUserRepository {
 	fmt.Println("Connecting to DB")
@@ -56,6 +51,17 @@ func (r *PostgresUserRepository) FindById(ctx context.Context, id int64) (*model
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (r *PostgresUserRepository) CheckUserInDB(ctx context.Context, username model.User) (bool, error) {
+	query := "SELECT EXISTS (SELECT 1 FROM userinfo WHERE username = $1)"
+	var exists bool
+	err := r.Conn.QueryRowContext(ctx, query, username.Username).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+
+	return exists, err
 }
 
 //var _ api.UserRepository = (*PostgresUserRepository)(nil)
