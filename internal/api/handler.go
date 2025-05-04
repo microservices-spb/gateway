@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"go/token"
 	"io"
 	"log"
 	"net/http"
@@ -65,7 +64,14 @@ func (h *Handler) Handler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	log.Println(id)
 
-	token, err := h.
+	registration, err := h.aC.SignUp(r.Context(), user)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+	log.Println(registration)
 
 	token, err := h.aC.DoLogin(r.Context(), user)
 	if err != nil {

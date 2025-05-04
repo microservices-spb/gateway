@@ -14,5 +14,5 @@ type UserRepository interface {
 
 type AuthClient interface {
 	DoLogin(ctx context.Context, data model.RequestData) (string, error)
-	SignUp(ctx context.Context, data model.RequestData) error
+	SignUp(ctx context.Context, data model.RequestData) (bool, error)
 }

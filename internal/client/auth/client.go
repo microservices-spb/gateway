@@ -40,13 +40,13 @@ func (c *Client) DoLogin(ctx context.Context, data model.RequestData) (string, e
 	return resp.Token, nil
 }
 
-func (c *Client) SignUp(ctx context.Context, data model.RequestData) error {
+func (c *Client) SignUp(ctx context.Context, data model.RequestData) (bool, error) {
 	username, err := c.check.CheckUserInDB(ctx, data.Username)
 	if err != nil {
-		return err
+		return username, err
 	}
 	if username {
-		return errors.New("username already taken")
+		return username, errors.New("username already taken")
 	}
 
 	usernameStr := strconv.FormatBool(username)
@@ -61,5 +61,5 @@ func (c *Client) SignUp(ctx context.Context, data model.RequestData) error {
 		Password: string(passHash),
 	})
 
-	return err
+	return username, nil
 }
